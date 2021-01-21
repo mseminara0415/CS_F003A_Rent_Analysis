@@ -67,15 +67,19 @@ def menu():
         except ValueError:
             print_menu()
             print("Try again. Please enter a valid number only.")
-        else:
-            if selected_option < 1 or selected_option > 9:
-                print_menu()
-                print("Try again. Please select a number from "
-                      "1-9.")
-            else:
-                print(f"Sorry, '{main_menu[selected_option]}' "
-                      f"functionality is not implemented yet.")
-                break
+            continue
+        if selected_option < 1 or selected_option > 9:
+            print_menu()
+            print("Try again. Please select a number from "
+                  "1-9.")
+            continue
+        if selected_option == 9:
+            print("See you next time!")
+            break
+
+        print(f"Sorry, '{main_menu[selected_option]}' "
+              f"functionality is not implemented yet.")
+        break
 
 
 if __name__ == '__main__':
