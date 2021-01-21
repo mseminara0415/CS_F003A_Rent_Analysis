@@ -67,15 +67,19 @@ def menu():
         except ValueError:
             print_menu()
             print("Try again. Please enter a valid number only.")
-        else:
-            if selected_option < 1 or selected_option > 9:
-                print_menu()
-                print("Try again. Please select a number from "
-                      "1-9.")
-            else:
-                print(f"Sorry, '{main_menu[selected_option]}' "
-                      f"functionality is not implemented yet.")
-                break
+            continue
+        if selected_option < 1 or selected_option > 9:
+            print_menu()
+            print("Try again. Please select a number from "
+                  "1-9.")
+            continue
+        if selected_option == 9:
+            print("Goodbye! See you next time")
+            break
+
+        print(f"Sorry, '{main_menu[selected_option]}' "
+              f"functionality is not implemented yet.")
+        break
 
 
 if __name__ == '__main__':
@@ -116,7 +120,24 @@ Main Menu
 What is your choice? 4
 Sorry, 'Print Min/Avg/Max by Location' functionality is not implemented yet.
 
------- Sample Run 3 (Invalid Input #1) ------
+------ Sample Run 3 (Valid Input #3) ------
+
+Hello, please enter your name: Matt
+Hey Matt, welcome to our class project!
+Main Menu
+1 - Print Average Rent by Location and Property Type
+2 - Print Minimum Rent by Location and Property Type
+3 - Print Maximum Rent by Location and Property Type
+4 - Print Min/Avg/Max by Location
+5 - Print Min/Avg/Max by Property Type
+6 - Adjust Location Filters
+7 - Adjust Property Type Filters
+8 - Load Data
+9 - Quit
+What is your choice? 9
+Goodbye! See you next time
+
+------ Sample Run 4 (Invalid Input #1) ------
 
 Hey Sarah, welcome to our class project!
 Main Menu
@@ -143,7 +164,7 @@ Main Menu
 Try again. Please select a number from 1-9.
 What is your choice?
 
------- Sample Run 4 (Invalid Input #2) ------
+------ Sample Run 5 (Invalid Input #2) ------
 
 Hello, please enter your name: Kevin
 Hey Kevin, welcome to our class project!
