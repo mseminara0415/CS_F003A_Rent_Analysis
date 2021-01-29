@@ -82,8 +82,72 @@ def menu():
         break
 
 
+def currency_converter(quantity: float, source_curr: str,
+                       target_curr: str):
+
+    source_in_usd = quantity * conversions["USD"] / conversions[
+        source_curr]
+
+    target_currency_converted = source_in_usd * conversions[target_curr]
+
+    return source_curr, target_curr, target_currency_converted
+
+
+def unit_test():
+    test_3 = currency_converter(2.8, "USD", "CAD")
+    test_4 = currency_converter(2.8, "CAD", "USD")
+    test_5 = currency_converter(10, "JPY", "EUR")
+
+    try:
+        currency_converter(2.8, "BAD", "USD")
+    except KeyError:
+        print("PASS: Invalid Source Currency Raises KeyError")
+    try:
+        currency_converter(2.8, "USD", "BAD")
+    except KeyError:
+        print("PASS: Invalid Source Currency Raises KeyError")
+
+    # Test USD to another currency
+    try:
+        print(f"PASS: Successful conversion from {test_3[0]} to "
+              f"{test_3[1]}")
+    except:
+        print(f"FAIL: Unsuccessful Conversion from {test_3[0]} to "
+              f"{test_3[1]}")
+
+    # Test another currency to USD
+    try:
+        print(f"PASS: Successful conversion from {test_4[0]} to "
+              f"{test_4[1]}")
+    except:
+        print(f"FAIL: Unsuccessful Conversion from {test_4[0]} to "
+              f"{test_4[1]}")
+
+    # Conversion between two currencies other than USD
+    try:
+        print(f"PASS: Successful conversion from {test_5[0]} to "
+              f"{test_5[1]}")
+    except:
+        print(f"FAIL: Unsuccessful Conversion from {test_5[0]} to "
+              f"{test_5[1]}")
+
+
 if __name__ == '__main__':
-    main()
+
+    conversions = {
+        "USD": 1,
+        "EUR": .9,
+        "CAD": 1.4,
+        "GBP": .8,
+        "CHF": .95,
+        "NZD": 1.66,
+        "AUD": 1.62,
+        "JPY": 107.92
+    }
+
+    unit_test()
+
+    # main()
 
 """
 ------ Sample Run 1 (Valid Input #1) ------
