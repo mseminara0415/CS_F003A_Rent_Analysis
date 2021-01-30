@@ -140,7 +140,7 @@ def unit_test():
         print("FAIL: Invalid Target Currency Does Not Raise ValueError")
 
     # Test USD to another currency
-    if test_3[2] == 8.0:
+    if test_3[2] == 8:
         print(f"PASS: Successful conversion from {test_3[0]} to "
               f"{test_3[1]}")
     else:
@@ -148,7 +148,7 @@ def unit_test():
               f"{test_3[1]}")
 
     # Test conversion from another currency to USD
-    if test_4[2] == 2.0:
+    if test_4[2] == 2:
         print(f"PASS: Successful conversion from {test_4[0]} to "
               f"{test_4[1]}")
     else:
