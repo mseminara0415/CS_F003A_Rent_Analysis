@@ -115,7 +115,7 @@ def currency_converter(quantity: float, source_curr: str,
 
 def unit_test():
     """
-    Test currency converter function for
+    Test currency converter function to see if it meets requirements.
     :return:
     """
 
