@@ -13,6 +13,8 @@ conversions = {
     "JPY": 107.92
 }
 
+home_currency = ''
+
 
 def print_menu():
     """
@@ -24,18 +26,18 @@ def print_menu():
 
     # Dictionary containing menu options
     menu_options = {
-            1: 'Print Average Rent by Location and Property '
-               'Type',
-            2: 'Print Minimum Rent by Location and Property '
-               'Type',
-            3: 'Print Maximum Rent by Location and Property '
-               'Type',
-            4: 'Print Min/Avg/Max by Location',
-            5: 'Print Min/Avg/Max by Property Type',
-            6: 'Adjust Location Filters',
-            7: 'Adjust Property Type Filters',
-            8: 'Load Data',
-            9: 'Quit'}
+        1: 'Print Average Rent by Location and Property '
+           'Type',
+        2: 'Print Minimum Rent by Location and Property '
+           'Type',
+        3: 'Print Maximum Rent by Location and Property '
+           'Type',
+        4: 'Print Min/Avg/Max by Location',
+        5: 'Print Min/Avg/Max by Property Type',
+        6: 'Adjust Location Filters',
+        7: 'Adjust Property Type Filters',
+        8: 'Load Data',
+        9: 'Quit'}
 
     # Print main menu options
     for option_number, option in menu_options.items():
@@ -86,6 +88,18 @@ def main():
     # Ask the user for their name and greet them
     name = input("Hello, please enter your name: ")
     print(f"Hey {name}, welcome to our class project!")
+
+    # Select currency
+    global home_currency
+    while True:
+        home_currency = input("What is your home currency?").upper()
+        if home_currency in conversions.keys():
+            currency_options(home_currency)
+            break
+        else:
+            print("Please select a valid currency.")
+            home_currency = ''
+            continue
 
     # Print main menu and ask for users input
     menu()
@@ -164,9 +178,21 @@ def unit_test():
               f"{test_5[1]}")
 
 
+def currency_options(base_currency: str):
+    quantities = [range(10, 91, 10)]
+
+    print(f"Options for converting from {base_currency}:")
+    for currency in conversions.keys():
+        if currency == base_currency:
+            continue
+        else:
+            print(base_currency)
+            print(currency, end=' ')
+
+
 if __name__ == '__main__':
-    unit_test()
-    # main()
+    # unit_test()
+    main()
 
 """
 ------ Sample Run Unit Test ------
