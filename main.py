@@ -1,6 +1,6 @@
 """ Greet users and ask for their name. Ask user what home currency
-they have and print out conversion rates based on other currencies.
-Prints main menu and asks users for their choice.
+they have and print out conversion table based on their selected home currency.
+The main menu is printed and asks users for their selected option.
 """
 
 conversions = {
@@ -125,7 +125,7 @@ def currency_converter(quantity: float, source_curr: str,
 
     target_currency_converted = source_in_usd * conversions[target_curr]
 
-    return source_curr, target_curr, target_currency_converted
+    return target_currency_converted
 
 
 def unit_test():
@@ -134,49 +134,30 @@ def unit_test():
     :return:
     """
 
-    test_3 = currency_converter(10, "USD", "GBP")
-    test_4 = currency_converter(2.8, "CAD", "USD")
-    test_5 = currency_converter(1.8, "EUR", "CAD")
-
-    # Invalid Source Currency
     try:
-        currency_converter(2.8, "BAD", "USD")
+        currency_converter(1, "USE", "USD")
     except KeyError:
-        print("PASS: Invalid Source Currency Raises KeyError")
+        print("PASS: Invalid Source Currency Raises ValueError")
     else:
-        print("FAIL: Invalid Source Currency Does Not Raise An Error")
-
-    # Invalid Target Currency
+        print("FAIL: Invalid Source Currency Does Not Raise Error")
     try:
-        currency_converter(2.8, "USD", "BAD")
+        currency_converter(1, "USD", "USE")
     except KeyError:
-        print("PASS: Invalid Target Currency Raises KeyError")
+        print("PASS: Invalid Target Currency Raises ValueError")
     else:
         print("FAIL: Invalid Target Currency Does Not Raise ValueError")
-
-    # Test USD to another currency
-    if test_3[2] == 8:
-        print(f"PASS: Successful conversion from {test_3[0]} to "
-              f"{test_3[1]}")
+    if currency_converter(10, "USD", "GBP") == 8:
+        print("PASS: Conversion from USD to GBP")
     else:
-        print(f"FAIL: Unsuccessful Conversion from {test_3[0]} to "
-              f"{test_3[1]}")
-
-    # Test conversion from another currency to USD
-    if test_4[2] == 2:
-        print(f"PASS: Successful conversion from {test_4[0]} to "
-              f"{test_4[1]}")
+        print("FAIL: Conversion from USD to GBP")
+    if currency_converter(2.8, "CAD", "USD") == 2:
+        print("PASS: Conversion from CAD to USD")
     else:
-        print(f"FAIL: Unsuccessful Conversion from {test_4[0]} to "
-              f"{test_4[1]}")
-
-    # Conversion between two currencies other than USD
-    if test_5[2] == 2.8:
-        print(f"PASS: Successful conversion from {test_5[0]} to "
-              f"{test_5[1]}")
+        print("FAIL: Conversion from CAD to USD")
+    if currency_converter(1.8, "EUR", "CAD") == 2.8:
+        print("PASS: Conversion from EUR to CAD")
     else:
-        print(f"FAIL: Unsuccessful Conversion from {test_5[0]} to "
-              f"{test_5[1]}")
+        print("FAIL: Conversion from EUR to CAD")
 
 
 def currency_options(base_currency: str):
@@ -197,8 +178,7 @@ def currency_options(base_currency: str):
     for quantity in quantities:
         print()
         for currency in currency_list:
-            print(f""
-                  f"{currency_converter(quantity, base_currency,currency)[2]:<10.2f}", end=' ')
+            print(f"{currency_converter(quantity, base_currency,currency):<10.2f}", end=' ')
 
 
 if __name__ == '__main__':
