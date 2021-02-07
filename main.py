@@ -22,8 +22,8 @@ def print_menu():
     Print the main menu options.
     :return: Dictionary of main menu choices.
     """
-
-    print("\nMain Menu")
+    print()
+    print("Main Menu")
 
     # Dictionary containing menu options
     menu_options = {
