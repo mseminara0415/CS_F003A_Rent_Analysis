@@ -1,5 +1,6 @@
-""" This program runs a unit test against the  'currency converter'
-function to see if it meets the expected criteria.
+""" Greet users and ask for their name. Ask user what home currency
+they have and print out conversion rates based on other currencies.
+Prints main menu and asks users for their choice.
 """
 
 conversions = {
@@ -22,7 +23,7 @@ def print_menu():
     :return: Dictionary of main menu choices.
     """
 
-    print("Main Menu")
+    print("\nMain Menu")
 
     # Dictionary containing menu options
     menu_options = {
@@ -179,15 +180,25 @@ def unit_test():
 
 
 def currency_options(base_currency: str):
-    quantities = [range(10, 91, 10)]
-
     print(f"Options for converting from {base_currency}:")
-    for currency in conversions.keys():
-        if currency == base_currency:
-            continue
-        else:
-            print(base_currency)
-            print(currency, end=' ')
+
+    currency_list = [currency for currency in conversions]
+
+    currency_list.remove(base_currency)
+
+    currency_list.insert(0, base_currency)
+
+    quantities = range(10, 91, 10)
+
+    # Print Header Line
+    for currency in currency_list:
+        print(f"{currency:10}", end=' ')
+
+    for quantity in quantities:
+        print()
+        for currency in currency_list:
+            print(f""
+                  f"{currency_converter(quantity, base_currency,currency)[2]:<10.2f}", end=' ')
 
 
 if __name__ == '__main__':
@@ -196,9 +207,31 @@ if __name__ == '__main__':
 
 """
 ------ Sample Run Unit Test ------
-PASS: Invalid Source Currency Raises KeyError
-PASS: Invalid Target Currency Raises KeyError
-PASS: Successful conversion from USD to GBP
-PASS: Successful conversion from CAD to USD
-PASS: Successful conversion from EUR to CAD
+Hello, please enter your name: Matt
+Hey Matt, welcome to our class project!
+What is your home currency?BAD
+Please select a valid currency.
+What is your home currency?GBP
+Options for converting from GBP:
+GBP        USD        EUR        CAD        CHF        NZD        AUD        JPY        
+10.00      12.50      11.25      17.50      11.88      20.75      20.25      1349.00    
+20.00      25.00      22.50      35.00      23.75      41.50      40.50      2698.00    
+30.00      37.50      33.75      52.50      35.62      62.25      60.75      4047.00    
+40.00      50.00      45.00      70.00      47.50      83.00      81.00      5396.00    
+50.00      62.50      56.25      87.50      59.38      103.75     101.25     6745.00    
+60.00      75.00      67.50      105.00     71.25      124.50     121.50     8094.00    
+70.00      87.50      78.75      122.50     83.12      145.25     141.75     9443.00    
+80.00      100.00     90.00      140.00     95.00      166.00     162.00     10792.00   
+90.00      112.50     101.25     157.50     106.88     186.75     182.25     12141.00   
+Main Menu
+1 - Print Average Rent by Location and Property Type
+2 - Print Minimum Rent by Location and Property Type
+3 - Print Maximum Rent by Location and Property Type
+4 - Print Min/Avg/Max by Location
+5 - Print Min/Avg/Max by Property Type
+6 - Adjust Location Filters
+7 - Adjust Property Type Filters
+8 - Load Data
+9 - Quit
+What is your choice? 
 """
