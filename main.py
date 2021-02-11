@@ -22,7 +22,7 @@ def print_menu():
     Print the main menu options.
     :return: Dictionary of main menu choices.
     """
-    print()
+
     print("Main Menu")
 
     # Dictionary containing menu options
@@ -47,13 +47,16 @@ def print_menu():
     return menu_options
 
 
-def menu():
+def menu(dataset):
     """
     Display the main menu and obtain users selection.
     :return:
     """
 
-    # Prints Main Menu
+    # Print Copyright
+    print(f"\n\n{dataset.copyright}")
+
+    # Print Main Menu
     main_menu = print_menu()
 
     # Ask the user for main menu selection
@@ -86,6 +89,16 @@ def main():
     :return:
     """
 
+    DataSet.copyright = "copyright Matthew Seminara"
+    air_bnb = DataSet()
+    while True:
+        try:
+            if air_bnb.header == "":
+                air_bnb.header = input("Enter a header for the menu:")
+            break
+        except ValueError:
+            continue
+
     # Ask the user for their name and greet them
     name = input("Hello, please enter your name: ")
     print(f"Hey {name}, welcome to our class project!")
@@ -103,7 +116,7 @@ def main():
             continue
 
     # Print main menu and ask for users input
-    menu()
+    menu(air_bnb)
 
 
 def currency_converter(quantity: float, source_curr: str,
@@ -181,37 +194,35 @@ def currency_options(base_currency: str):
             print(f"{currency_converter(quantity, base_currency,currency):<10.2f}", end=' ')
 
 
+class DataSet:
+    header_max_length = 30
+    copyright = "No copyright has been set"
+
+    def __init__(self, header=""):
+        try:
+            self.header = header
+        except ValueError:
+            self.header = ""
+
+        self._data = None
+
+    @property
+    def header(self):
+        return self._header
+
+    @header.setter
+    def header(self, header: str):
+        if len(header) <= DataSet.header_max_length:
+            self._header = header
+        else:
+            raise ValueError("Header must be <= 30 characters")
+
+
 if __name__ == '__main__':
-    # unit_test()
     main()
 
-"""
------- Sample Run Unit Test ------
-Hello, please enter your name: Matt
-Hey Matt, welcome to our class project!
-What is your home currency?BAD
-Please select a valid currency.
-What is your home currency?GBP
-Options for converting from GBP:
-GBP        USD        EUR        CAD        CHF        NZD        AUD        JPY        
-10.00      12.50      11.25      17.50      11.88      20.75      20.25      1349.00    
-20.00      25.00      22.50      35.00      23.75      41.50      40.50      2698.00    
-30.00      37.50      33.75      52.50      35.62      62.25      60.75      4047.00    
-40.00      50.00      45.00      70.00      47.50      83.00      81.00      5396.00    
-50.00      62.50      56.25      87.50      59.38      103.75     101.25     6745.00    
-60.00      75.00      67.50      105.00     71.25      124.50     121.50     8094.00    
-70.00      87.50      78.75      122.50     83.12      145.25     141.75     9443.00    
-80.00      100.00     90.00      140.00     95.00      166.00     162.00     10792.00   
-90.00      112.50     101.25     157.50     106.88     186.75     182.25     12141.00   
-Main Menu
-1 - Print Average Rent by Location and Property Type
-2 - Print Minimum Rent by Location and Property Type
-3 - Print Maximum Rent by Location and Property Type
-4 - Print Min/Avg/Max by Location
-5 - Print Min/Avg/Max by Property Type
-6 - Adjust Location Filters
-7 - Adjust Property Type Filters
-8 - Load Data
-9 - Quit
-What is your choice? 
-"""
+
+
+
+
+
