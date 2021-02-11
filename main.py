@@ -47,14 +47,44 @@ def print_menu():
     return menu_options
 
 
-def menu(dataset):
+class DataSet:
+    header_max_length = 30
+    copyright = "No copyright has been set"
+
+    def __init__(self, header=""):
+        try:
+            self.header = header
+        except ValueError:
+            self.header = ""
+
+        self._data = None
+
+    @property
+    def header(self):
+        return self._header
+
+    @header.setter
+    def header(self, header: str):
+        if len(header) <= DataSet.header_max_length:
+            self._header = header
+        else:
+            raise ValueError("Header must be <= 30 characters")
+
+
+def menu(dataset: DataSet):
     """
     Display the main menu and obtain users selection.
     :return:
     """
 
+    # Print Currency Options
+    currency_options(home_currency)
+
     # Print Copyright
     print(f"\n\n{dataset.copyright}")
+
+    # Print Header
+    print(f"{dataset.header}")
 
     # Print Main Menu
     main_menu = print_menu()
@@ -79,44 +109,6 @@ def menu(dataset):
         print(f"Sorry, '{main_menu[selected_option]}' "
               f"functionality is not implemented yet.")
         break
-
-
-def main():
-    """
-    Obtain the user's name and greet them. After welcoming the user,
-    display the main menu and ask for users selection while
-    responding accordingly.
-    :return:
-    """
-
-    DataSet.copyright = "copyright Matthew Seminara"
-    air_bnb = DataSet()
-    while True:
-        try:
-            if air_bnb.header == "":
-                air_bnb.header = input("Enter a header for the menu:")
-            break
-        except ValueError:
-            continue
-
-    # Ask the user for their name and greet them
-    name = input("Hello, please enter your name: ")
-    print(f"Hey {name}, welcome to our class project!")
-
-    # Select currency
-    global home_currency
-    while True:
-        home_currency = input("What is your home currency?").upper()
-        if home_currency in conversions.keys():
-            currency_options(home_currency)
-            break
-        else:
-            print("Please select a valid currency.")
-            home_currency = ''
-            continue
-
-    # Print main menu and ask for users input
-    menu(air_bnb)
 
 
 def currency_converter(quantity: float, source_curr: str,
@@ -173,6 +165,51 @@ def unit_test():
         print("FAIL: Conversion from EUR to CAD")
 
 
+def class_unit_test():
+    test1 = DataSet()
+    test2 = DataSet("Less than 30 characters")
+    test3 = DataSet("More than 30 characters long is not going to work")
+    test4 = DataSet()
+    test5 = DataSet()
+
+    if test1.header == "":
+        print("Testing constructor with default parameter: Pass")
+    else:
+        print("Testing constructor with default parameter: Fail")
+    if test2.header == "Less than 30 characters":
+        print("Testing constructor with valid header argument: Pass")
+    else:
+        print("Testing constructor with valid header argument: Fail")
+    if test3.header == "":
+        print("Testing constructor with invalid header argument: Pass")
+    else:
+        print("Testing constructor with invalid header argument: Fail")
+    try:
+        test4.header = "This should work"
+        if test4.header == "This should work":
+            print("Testing setter with valid assignment: Pass")
+    except ValueError:
+        print("Testing setter with valid assignment: Fail")
+    try:
+        test5.header = "This should not work since more than 30"
+        if test5.header == "This should not work since more than 30":
+            print("Testing setter with invalid assignment: Fail")
+    except ValueError:
+        print("Testing setter with invalid assignment: Pass")
+    DataSet.copyright = "copyright Matt Seminara unit test"
+    if DataSet.copyright == "copyright Matt Seminara unit test":
+        print("Checking that I can access Dataset.copyright: Pass")
+    else:
+        print("Checking that I can access Dataset.copyright: Fail")
+    test6 = DataSet()
+    if test6.copyright == "copyright Matt Seminara unit test":
+        print("Setting Dataset.copyright = 'copyright Matt Seminara "
+              "unit test'")
+        print("Checking that I can access copyright after creating an object: Pass")
+    else:
+        print("Checking that I can access copyright after creating an object: Fail")
+
+
 def currency_options(base_currency: str):
     print(f"Options for converting from {base_currency}:")
 
@@ -194,29 +231,38 @@ def currency_options(base_currency: str):
             print(f"{currency_converter(quantity, base_currency,currency):<10.2f}", end=' ')
 
 
-class DataSet:
-    header_max_length = 30
-    copyright = "No copyright has been set"
+def main():
+    """
+    Obtain the user's name and greet them. After welcoming the user,
+    display the main menu and ask for users selection while
+    responding accordingly.
+    :return:
+    """
 
-    def __init__(self, header=""):
+    # Ask the user for their name and greet them
+    name = input("Hello, please enter your name: ")
+    print(f"Hey {name}, welcome to our class project!")
+
+    # Select currency
+    global home_currency
+
+    while home_currency not in conversions:
+        home_currency = input("What is your home currency?")
+
+    DataSet.copyright = "copyright Matthew Seminara"
+    air_bnb = DataSet()
+    while True:
         try:
-            self.header = header
+            if air_bnb.header == "":
+                air_bnb.header = input("Enter a header for the menu:")
+            break
         except ValueError:
-            self.header = ""
+            continue
 
-        self._data = None
-
-    @property
-    def header(self):
-        return self._header
-
-    @header.setter
-    def header(self, header: str):
-        if len(header) <= DataSet.header_max_length:
-            self._header = header
-        else:
-            raise ValueError("Header must be <= 30 characters")
+    # Print main menu and ask for users input
+    menu(air_bnb)
 
 
 if __name__ == '__main__':
+
     main()
