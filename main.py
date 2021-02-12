@@ -1,5 +1,6 @@
 """ Greet users and ask for their name. Ask user what home currency
 they have and print out conversion table based on their selected home currency.
+Asks users to enter a header for their dataset that will be displayed above the menu.
 The main menu is printed and asks users for their selected option.
 """
 
@@ -48,6 +49,9 @@ def print_menu():
 
 
 class DataSet:
+    """
+    Class to manage our dataset.
+    """
     header_max_length = 30
     copyright = "No copyright has been set"
 
@@ -166,6 +170,10 @@ def unit_test():
 
 
 def class_unit_test():
+    """
+    Unit test to make sure our class DataSet meets specifications.
+    :return:
+    """
     test1 = DataSet()
     test2 = DataSet("Less than 30 characters")
     test3 = DataSet("More than 30 characters long is not going to work")
@@ -211,6 +219,12 @@ def class_unit_test():
 
 
 def currency_options(base_currency: str):
+    """
+    Prints out currency option table, which shows conversion rates
+    against their selected home currency.
+    :param base_currency:
+    :return:
+    """
     print(f"Options for converting from {base_currency}:")
 
     currency_list = [currency for currency in conversions]
@@ -264,5 +278,48 @@ def main():
 
 
 if __name__ == '__main__':
-
+    # class_unit_test()
     main()
+
+"""
+========= Sample run 1 (Unit Test) =========
+Testing constructor with default parameter: Pass
+Testing constructor with valid header argument: Pass
+Testing constructor with invalid header argument: Pass
+Testing setter with valid assignment: Pass
+Testing setter with invalid assignment: Pass
+Checking that I can access Dataset.copyright: Pass
+Setting Dataset.copyright = 'copyright Matt Seminara unit test'
+Checking that I can access copyright after creating an object: Pass
+
+========== Sample run 2 (Main) ==========
+Hello, please enter your name: Matt
+Hey Matt, welcome to our class project!
+What is your home currency?JPY
+Enter a header for the menu:THIS IS A HEADER
+Options for converting from JPY:
+JPY        USD        EUR        CAD        GBP        CHF        NZD        AUD        
+10.00      0.09       0.08       0.13       0.07       0.09       0.15       0.15       
+20.00      0.19       0.17       0.26       0.15       0.18       0.31       0.30       
+30.00      0.28       0.25       0.39       0.22       0.26       0.46       0.45       
+40.00      0.37       0.33       0.52       0.30       0.35       0.62       0.60       
+50.00      0.46       0.42       0.65       0.37       0.44       0.77       0.75       
+60.00      0.56       0.50       0.78       0.44       0.53       0.92       0.90       
+70.00      0.65       0.58       0.91       0.52       0.62       1.08       1.05       
+80.00      0.74       0.67       1.04       0.59       0.70       1.23       1.20       
+90.00      0.83       0.75       1.17       0.67       0.79       1.38       1.35       
+
+copyright Matthew Seminara
+THIS IS A HEADER
+Main Menu
+1 - Print Average Rent by Location and Property Type
+2 - Print Minimum Rent by Location and Property Type
+3 - Print Maximum Rent by Location and Property Type
+4 - Print Min/Avg/Max by Location
+5 - Print Min/Avg/Max by Property Type
+6 - Adjust Location Filters
+7 - Adjust Property Type Filters
+8 - Load Data
+9 - Quit
+What is your choice? 
+"""
