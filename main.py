@@ -1,5 +1,6 @@
 """ Greet users and ask for their name. Ask user what home currency
 they have and print out conversion table based on their selected home currency.
+Asks users to enter a header for their dataset that will be displayed above the menu.
 The main menu is printed and asks users for their selected option.
 """
 
@@ -22,7 +23,7 @@ def print_menu():
     Print the main menu options.
     :return: Dictionary of main menu choices.
     """
-    print()
+
     print("Main Menu")
 
     # Dictionary containing menu options
@@ -47,13 +48,49 @@ def print_menu():
     return menu_options
 
 
-def menu():
+class DataSet:
+    """
+    Class to manage our dataset.
+    """
+    header_max_length = 30
+    copyright = "No copyright has been set"
+
+    def __init__(self, header=""):
+        try:
+            self.header = header
+        except ValueError:
+            self.header = ""
+
+        self._data = None
+
+    @property
+    def header(self):
+        return self._header
+
+    @header.setter
+    def header(self, header: str):
+        if len(header) <= DataSet.header_max_length:
+            self._header = header
+        else:
+            raise ValueError("Header must be <= 30 characters")
+
+
+def menu(dataset: DataSet):
     """
     Display the main menu and obtain users selection.
     :return:
     """
 
-    # Prints Main Menu
+    # Print Currency Options
+    currency_options(home_currency)
+
+    # Print Copyright
+    print(f"\n\n{dataset.copyright}")
+
+    # Print Header
+    print(f"{dataset.header}")
+
+    # Print Main Menu
     main_menu = print_menu()
 
     # Ask the user for main menu selection
@@ -76,34 +113,6 @@ def menu():
         print(f"Sorry, '{main_menu[selected_option]}' "
               f"functionality is not implemented yet.")
         break
-
-
-def main():
-    """
-    Obtain the user's name and greet them. After welcoming the user,
-    display the main menu and ask for users selection while
-    responding accordingly.
-    :return:
-    """
-
-    # Ask the user for their name and greet them
-    name = input("Hello, please enter your name: ")
-    print(f"Hey {name}, welcome to our class project!")
-
-    # Select currency
-    global home_currency
-    while True:
-        home_currency = input("What is your home currency?").upper()
-        if home_currency in conversions.keys():
-            currency_options(home_currency)
-            break
-        else:
-            print("Please select a valid currency.")
-            home_currency = ''
-            continue
-
-    # Print main menu and ask for users input
-    menu()
 
 
 def currency_converter(quantity: float, source_curr: str,
@@ -160,7 +169,62 @@ def unit_test():
         print("FAIL: Conversion from EUR to CAD")
 
 
+def class_unit_test():
+    """
+    Unit test to make sure our class DataSet meets specifications.
+    :return:
+    """
+    test1 = DataSet()
+    test2 = DataSet("Less than 30 characters")
+    test3 = DataSet("More than 30 characters long is not going to work")
+    test4 = DataSet()
+    test5 = DataSet()
+
+    if test1.header == "":
+        print("Testing constructor with default parameter: Pass")
+    else:
+        print("Testing constructor with default parameter: Fail")
+    if test2.header == "Less than 30 characters":
+        print("Testing constructor with valid header argument: Pass")
+    else:
+        print("Testing constructor with valid header argument: Fail")
+    if test3.header == "":
+        print("Testing constructor with invalid header argument: Pass")
+    else:
+        print("Testing constructor with invalid header argument: Fail")
+    try:
+        test4.header = "This should work"
+        if test4.header == "This should work":
+            print("Testing setter with valid assignment: Pass")
+    except ValueError:
+        print("Testing setter with valid assignment: Fail")
+    try:
+        test5.header = "This should not work since more than 30"
+        if test5.header == "This should not work since more than 30":
+            print("Testing setter with invalid assignment: Fail")
+    except ValueError:
+        print("Testing setter with invalid assignment: Pass")
+    DataSet.copyright = "copyright Matt Seminara unit test"
+    if DataSet.copyright == "copyright Matt Seminara unit test":
+        print("Checking that I can access Dataset.copyright: Pass")
+    else:
+        print("Checking that I can access Dataset.copyright: Fail")
+    test6 = DataSet()
+    if test6.copyright == "copyright Matt Seminara unit test":
+        print("Setting Dataset.copyright = 'copyright Matt Seminara "
+              "unit test'")
+        print("Checking that I can access copyright after creating an object: Pass")
+    else:
+        print("Checking that I can access copyright after creating an object: Fail")
+
+
 def currency_options(base_currency: str):
+    """
+    Prints out currency option table, which shows conversion rates
+    against their selected home currency.
+    :param base_currency:
+    :return:
+    """
     print(f"Options for converting from {base_currency}:")
 
     currency_list = [currency for currency in conversions]
@@ -181,28 +245,72 @@ def currency_options(base_currency: str):
             print(f"{currency_converter(quantity, base_currency,currency):<10.2f}", end=' ')
 
 
+def main():
+    """
+    Obtain the user's name and greet them. After welcoming the user,
+    display the main menu and ask for users selection while
+    responding accordingly.
+    :return:
+    """
+
+    # Ask the user for their name and greet them
+    name = input("Hello, please enter your name: ")
+    print(f"Hey {name}, welcome to our class project!")
+
+    # Select currency
+    global home_currency
+
+    while home_currency not in conversions:
+        home_currency = input("What is your home currency?")
+
+    DataSet.copyright = "copyright Matthew Seminara"
+    air_bnb = DataSet()
+    while True:
+        try:
+            if air_bnb.header == "":
+                air_bnb.header = input("Enter a header for the menu:")
+            break
+        except ValueError:
+            continue
+
+    # Print main menu and ask for users input
+    menu(air_bnb)
+
+
 if __name__ == '__main__':
-    # unit_test()
+    # class_unit_test()
     main()
 
 """
------- Sample Run Unit Test ------
+========= Sample run 1 (Unit Test) =========
+Testing constructor with default parameter: Pass
+Testing constructor with valid header argument: Pass
+Testing constructor with invalid header argument: Pass
+Testing setter with valid assignment: Pass
+Testing setter with invalid assignment: Pass
+Checking that I can access Dataset.copyright: Pass
+Setting Dataset.copyright = 'copyright Matt Seminara unit test'
+Checking that I can access copyright after creating an object: Pass
+
+========== Sample run 2 (Main) ==========
 Hello, please enter your name: Matt
 Hey Matt, welcome to our class project!
-What is your home currency?BAD
-Please select a valid currency.
-What is your home currency?GBP
-Options for converting from GBP:
-GBP        USD        EUR        CAD        CHF        NZD        AUD        JPY        
-10.00      12.50      11.25      17.50      11.88      20.75      20.25      1349.00    
-20.00      25.00      22.50      35.00      23.75      41.50      40.50      2698.00    
-30.00      37.50      33.75      52.50      35.62      62.25      60.75      4047.00    
-40.00      50.00      45.00      70.00      47.50      83.00      81.00      5396.00    
-50.00      62.50      56.25      87.50      59.38      103.75     101.25     6745.00    
-60.00      75.00      67.50      105.00     71.25      124.50     121.50     8094.00    
-70.00      87.50      78.75      122.50     83.12      145.25     141.75     9443.00    
-80.00      100.00     90.00      140.00     95.00      166.00     162.00     10792.00   
-90.00      112.50     101.25     157.50     106.88     186.75     182.25     12141.00   
+What is your home currency?JPY
+Enter a header for the menu:THIS IS A HEADER
+Options for converting from JPY:
+JPY        USD        EUR        CAD        GBP        CHF        NZD        AUD        
+10.00      0.09       0.08       0.13       0.07       0.09       0.15       0.15       
+20.00      0.19       0.17       0.26       0.15       0.18       0.31       0.30       
+30.00      0.28       0.25       0.39       0.22       0.26       0.46       0.45       
+40.00      0.37       0.33       0.52       0.30       0.35       0.62       0.60       
+50.00      0.46       0.42       0.65       0.37       0.44       0.77       0.75       
+60.00      0.56       0.50       0.78       0.44       0.53       0.92       0.90       
+70.00      0.65       0.58       0.91       0.52       0.62       1.08       1.05       
+80.00      0.74       0.67       1.04       0.59       0.70       1.23       1.20       
+90.00      0.83       0.75       1.17       0.67       0.79       1.38       1.35       
+
+copyright Matthew Seminara
+THIS IS A HEADER
 Main Menu
 1 - Print Average Rent by Location and Property Type
 2 - Print Minimum Rent by Location and Property Type
