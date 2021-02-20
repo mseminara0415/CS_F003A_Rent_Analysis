@@ -84,6 +84,12 @@ class DataSet:
 
     def _cross_table_statistics(self, descriptor_one: str,
                                 descriptor_two: str):
+        """
+        Find data that matches both descriptors.
+        :param descriptor_one:
+        :param descriptor_two:
+        :return: tuple that includes min,avg,max of matching data
+        """
         if self._data is None:
             raise DataSet.EmptyDatasetError("Please load data.")
         else:
@@ -98,6 +104,10 @@ class DataSet:
                 return min(rents), avg, max(rents)
 
     def load_default_data(self):
+        """
+        Load dataset.
+        :return:
+        """
         self._data = [('Staten Island', 'Private room', 70),
                       ('Brooklyn', 'Private room', 50),
                       ('Bronx', 'Private room', 40),
