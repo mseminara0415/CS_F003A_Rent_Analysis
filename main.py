@@ -63,6 +63,14 @@ class DataSet:
 
         self._data = None
 
+    class EmptyDatasetError(Exception):
+        def __init__(self, message):
+            self.message = message
+
+    class NoMatchingItems(Exception):
+        def __init__(self, message):
+            self.message = message
+
     @property
     def header(self):
         return self._header
@@ -73,6 +81,41 @@ class DataSet:
             self._header = header
         else:
             raise ValueError("Header must be <= 30 characters")
+
+    def _cross_table_statistics(self, descriptor_one: str,
+                                descriptor_two: str):
+        if self._data is None:
+            raise DataSet.EmptyDatasetError("Please load data.")
+        else:
+            matching = [test for test in self._data if test[0] ==
+                        descriptor_one and test[1] == descriptor_two]
+            if not matching:
+                raise DataSet.NoMatchingItems("No matching items.")
+            else:
+                rents = [rent[2] for rent in matching]
+                avg = sum(rents) / len(rents)
+
+                return min(rents), avg, max(rents)
+
+    def load_default_data(self):
+        self._data = [('Staten Island', 'Private room', 70),
+                      ('Brooklyn', 'Private room', 50),
+                      ('Bronx', 'Private room', 40),
+                      ('Brooklyn', 'Entire home / apt', 150),
+                      ('Manhattan', 'Private room', 125),
+                      ('Manhattan', 'Entire home / apt', 196),
+                      ('Brooklyn', 'Private room', 110),
+                      ('Manhattan', 'Entire home / apt', 170),
+                      ('Manhattan', 'Entire home / apt', 165),
+                      ('Manhattan', 'Entire home / apt', 150),
+                      ('Manhattan', 'Entire home / apt', 100),
+                      ('Brooklyn', 'Private room', 65),
+                      ('Queens', 'Entire home / apt', 350),
+                      ('Manhattan', 'Private room', 98),
+                      ('Brooklyn', 'Entire home / apt', 200),
+                      ('Brooklyn', 'Entire home / apt', 150),
+                      ('Brooklyn', 'Private room', 99),
+                      ('Brooklyn', 'Private room', 120)]
 
 
 def menu(dataset: DataSet):
@@ -213,9 +256,62 @@ def class_unit_test():
     if test6.copyright == "copyright Matt Seminara unit test":
         print("Setting Dataset.copyright = 'copyright Matt Seminara "
               "unit test'")
-        print("Checking that I can access copyright after creating an object: Pass")
+        print(
+            "Checking that I can access copyright after creating an object: Pass")
     else:
-        print("Checking that I can access copyright after creating an object: Fail")
+        print(
+            "Checking that I can access copyright after creating an object: Fail")
+
+
+def data_unit_test():
+    my_set = DataSet()
+
+    try:
+        my_set._cross_table_statistics("no data", "no data")
+    except DataSet.EmptyDatasetError:
+        print("Method Raises EmptyDataSet Error: Pass")
+    else:
+        print("Method Raises EmptyDataSet Error: Fail")
+
+    # Load Data
+    my_set.load_default_data()
+
+    try:
+        my_set._cross_table_statistics("Bronx", "duplex")
+    except DataSet.NoMatchingItems:
+        print("Invalid Property Type Raises NoMatchingItems Error: "
+              "Pass")
+    else:
+        print("Invalid Property Type Raises NoMatchingItems Error: "
+              "Fail")
+    try:
+        my_set._cross_table_statistics("Los Angeles", "Private room")
+    except DataSet.NoMatchingItems:
+        print("Invalid Borough Raises NoMatchingItems Error: Pass")
+    else:
+        print("Invalid Borough Raises NoMatchingItems Error: Fail")
+
+    try:
+        my_set._cross_table_statistics("Staten Island", "Entire home "
+                                                        "/ apt")
+    except DataSet.NoMatchingItems:
+        print("No Matching Rows Raises NoMatchingItems: Pass")
+    else:
+        print("No Matching Rows Raises NoMatchingItems: Fail")
+
+    test1 = my_set._cross_table_statistics("Staten Island", "Private room")
+
+    if test1 == (70, 70, 70):
+        print("One Matching Row Returns Correct Tuple: Pass")
+    else:
+        print("One Matching Row Returns Correct Tuple: Fail")
+
+    test2 = my_set._cross_table_statistics("Manhattan", "Private room")
+
+    if test2 == (98, 111.5, 125):
+        print("Multiple Matching Rows Returns Correct Tuple: Pass")
+    else:
+        print("Multiple Matching Rows Returns Correct Tuple: Fail")
 
 
 def currency_options(base_currency: str):
@@ -242,7 +338,9 @@ def currency_options(base_currency: str):
     for quantity in quantities:
         print()
         for currency in currency_list:
-            print(f"{currency_converter(quantity, base_currency,currency):<10.2f}", end=' ')
+            print(
+                f"{currency_converter(quantity, base_currency, currency):<10.2f}",
+                end=' ')
 
 
 def main():
@@ -261,7 +359,7 @@ def main():
     global home_currency
 
     while home_currency not in conversions:
-        home_currency = input("What is your home currency?")
+        home_currency = input("What is your home currency?").upper()
 
     DataSet.copyright = "copyright Matthew Seminara"
     air_bnb = DataSet()
@@ -278,48 +376,15 @@ def main():
 
 
 if __name__ == '__main__':
-    # class_unit_test()
-    main()
+    data_unit_test()
+    # main()
 
 """
-========= Sample run 1 (Unit Test) =========
-Testing constructor with default parameter: Pass
-Testing constructor with valid header argument: Pass
-Testing constructor with invalid header argument: Pass
-Testing setter with valid assignment: Pass
-Testing setter with invalid assignment: Pass
-Checking that I can access Dataset.copyright: Pass
-Setting Dataset.copyright = 'copyright Matt Seminara unit test'
-Checking that I can access copyright after creating an object: Pass
-
-========== Sample run 2 (Main) ==========
-Hello, please enter your name: Matt
-Hey Matt, welcome to our class project!
-What is your home currency?JPY
-Enter a header for the menu:THIS IS A HEADER
-Options for converting from JPY:
-JPY        USD        EUR        CAD        GBP        CHF        NZD        AUD        
-10.00      0.09       0.08       0.13       0.07       0.09       0.15       0.15       
-20.00      0.19       0.17       0.26       0.15       0.18       0.31       0.30       
-30.00      0.28       0.25       0.39       0.22       0.26       0.46       0.45       
-40.00      0.37       0.33       0.52       0.30       0.35       0.62       0.60       
-50.00      0.46       0.42       0.65       0.37       0.44       0.77       0.75       
-60.00      0.56       0.50       0.78       0.44       0.53       0.92       0.90       
-70.00      0.65       0.58       0.91       0.52       0.62       1.08       1.05       
-80.00      0.74       0.67       1.04       0.59       0.70       1.23       1.20       
-90.00      0.83       0.75       1.17       0.67       0.79       1.38       1.35       
-
-copyright Matthew Seminara
-THIS IS A HEADER
-Main Menu
-1 - Print Average Rent by Location and Property Type
-2 - Print Minimum Rent by Location and Property Type
-3 - Print Maximum Rent by Location and Property Type
-4 - Print Min/Avg/Max by Location
-5 - Print Min/Avg/Max by Property Type
-6 - Adjust Location Filters
-7 - Adjust Property Type Filters
-8 - Load Data
-9 - Quit
-What is your choice? 
+========== Sample Run ==========
+Method Raises EmptyDataSet Error: Pass
+Invalid Property Type Raises NoMatchingItems Error: Pass
+Invalid Borough Raises NoMatchingItems Error: Pass
+No Matching Rows Raises NoMatchingItems: Pass
+One Matching Row Returns Correct Tuple: Pass
+Multiple Matching Rows Returns Correct Tuple: Pass
 """
