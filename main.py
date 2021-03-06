@@ -4,6 +4,8 @@ Asks users to enter a header for their dataset that will be displayed above the 
 The main menu is printed and asks users for their selected option.
 """
 
+from enum import Enum
+
 conversions = {
     "USD": 1,
     "EUR": .9,
@@ -62,6 +64,8 @@ class DataSet:
             self.header = ""
 
         self._data = None
+        self._labels = {}
+        self._active_labels = {}
 
     class EmptyDatasetError(Exception):
         def __init__(self, message):
@@ -70,6 +74,15 @@ class DataSet:
     class NoMatchingItems(Exception):
         def __init__(self, message):
             self.message = message
+
+    class Categories(Enum):
+        LOCATION = 0
+        PROPERTY_TYPE = 1
+
+    class Stats(Enum):
+        MIN = 2
+        AVG = 1
+        MAX = 3
 
     @property
     def header(self):
@@ -81,6 +94,24 @@ class DataSet:
             self._header = header
         else:
             raise ValueError("Header must be <= 30 characters")
+
+    def _initialize_sets(self):
+        if self._data is None:
+            raise DataSet.EmptyDatasetError("Please load data.")
+        else:
+            location_list = [location[
+                                 DataSet.Categories.LOCATION.value]
+                             for location in self._data]
+
+            prop_list = [location[
+                             DataSet.Categories.PROPERTY_TYPE.value]
+                         for location in self._data]
+
+            self._labels = {DataSet.Categories.LOCATION: set(
+                location_list), DataSet.Categories.PROPERTY_TYPE: set(
+                prop_list)}
+
+            self._active_labels = self._labels.copy()
 
     def _cross_table_statistics(self, descriptor_one: str,
                                 descriptor_two: str):
@@ -102,6 +133,31 @@ class DataSet:
                 avg = sum(rents) / len(rents)
 
                 return min(rents), avg, max(rents)
+
+    def display_cross_table(self, stat: Stats):
+        """
+        Displays table stats.
+        :param stat:
+        :return:
+        """
+        if self._data is None:
+            raise DataSet.EmptyDatasetError("Please load data.")
+        else:
+
+            # Print Headers (Property Types)
+            location_list = self._labels[DataSet.Categories.LOCATION]
+            property_list = self._labels[DataSet.Categories.PROPERTY_TYPE]
+            for property in property_list:
+                print(f"{property:>30}", end=' ')
+
+            for location in location_list:
+                print(f"{location:<20}")
+                # for property1 in property_list:
+                #     print(f"""
+                #     {self._cross_table_statistics(location,property1)[DataSet.Stats]:30}]
+                #
+                #
+                #     """)
 
     def load_default_data(self):
         """
@@ -309,7 +365,8 @@ def data_unit_test():
     else:
         print("No Matching Rows Raises NoMatchingItems: Fail")
 
-    test1 = my_set._cross_table_statistics("Staten Island", "Private room")
+    test1 = my_set._cross_table_statistics("Staten Island",
+                                           "Private room")
 
     if test1 == (70, 70, 70):
         print("One Matching Row Returns Correct Tuple: Pass")
@@ -386,15 +443,11 @@ def main():
 
 
 if __name__ == '__main__':
-    data_unit_test()
+    # data_unit_test()
     # main()
-
-"""
-========== Sample Run ==========
-Method Raises EmptyDataSet Error: Pass
-Invalid Property Type Raises NoMatchingItems Error: Pass
-Invalid Borough Raises NoMatchingItems Error: Pass
-No Matching Rows Raises NoMatchingItems: Pass
-One Matching Row Returns Correct Tuple: Pass
-Multiple Matching Rows Returns Correct Tuple: Pass
-"""
+    # for location in Categories:
+    #     print(location.value)
+    test = DataSet()
+    test.load_default_data()
+    test._initialize_sets()
+    test.display_cross_table(DataSet.Stats.MAX)
