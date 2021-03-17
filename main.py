@@ -96,6 +96,10 @@ class DataSet:
             raise ValueError("Header must be <= 30 characters")
 
     def _initialize_sets(self):
+        """ Examine the category labels in self.__data and create a set
+        for each category containing the labels.
+        :return:
+        """
         if self._data is None:
             raise DataSet.EmptyDatasetError("Please load data.")
         else:
