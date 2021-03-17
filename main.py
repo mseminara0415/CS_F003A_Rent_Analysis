@@ -1,8 +1,10 @@
 """ Greet users and ask for their name. Ask user what home currency
 they have and print out conversion table based on their selected home currency.
-Asks users to enter a header for their dataset that will be displayed above the menu.
-The main menu is printed and asks users for their selected option.
+Asks users to enter a header for their dataset that will be displayed above the
+menu.The main menu is printed and asks users for their selected option.
 """
+
+from enum import Enum
 
 conversions = {
     "USD": 1,
@@ -62,6 +64,8 @@ class DataSet:
             self.header = ""
 
         self._data = None
+        self._labels = {}
+        self._active_labels = {}
 
     class EmptyDatasetError(Exception):
         def __init__(self, message):
@@ -70,6 +74,15 @@ class DataSet:
     class NoMatchingItems(Exception):
         def __init__(self, message):
             self.message = message
+
+    class Categories(Enum):
+        LOCATION = 0
+        PROPERTY_TYPE = 1
+
+    class Stats(Enum):
+        MIN = 0
+        AVG = 1
+        MAX = 2
 
     @property
     def header(self):
@@ -81,6 +94,28 @@ class DataSet:
             self._header = header
         else:
             raise ValueError("Header must be <= 30 characters")
+
+    def _initialize_sets(self):
+        """ Examine the category labels in self.__data and create a set
+        for each category containing the labels.
+        :return:
+        """
+        if self._data is None:
+            raise DataSet.EmptyDatasetError("Please load data.")
+        else:
+            location_list = [location[
+                                 DataSet.Categories.LOCATION.value]
+                             for location in self._data]
+
+            prop_list = [location[
+                             DataSet.Categories.PROPERTY_TYPE.value]
+                         for location in self._data]
+
+            self._labels = {DataSet.Categories.LOCATION: set(
+                location_list), DataSet.Categories.PROPERTY_TYPE: set(
+                prop_list)}
+
+            self._active_labels = self._labels.copy()
 
     def _cross_table_statistics(self, descriptor_one: str,
                                 descriptor_two: str):
@@ -102,6 +137,38 @@ class DataSet:
                 avg = sum(rents) / len(rents)
 
                 return min(rents), avg, max(rents)
+
+       def display_cross_table(self, stat: Stats):
+        """
+        Displays table stats.
+        :param stat:
+        :return:
+        """
+        if self._data is None:
+            raise DataSet.EmptyDatasetError("Please load data.")
+        else:
+
+            # Print Headers (Property Types)
+            location_list = list(self._labels[DataSet.Categories.LOCATION])
+            location_list.sort()
+            property_list = list(self._labels[DataSet.Categories.PROPERTY_TYPE])
+            property_list.sort()
+
+            print(f"               ", end="")
+            # Print Header
+            for property_name in property_list:
+                print(f"{property_name:20}", end=' ')
+            print()
+            for location in location_list:
+                print(f"{location:15}", end=' ')
+                for property_type in property_list:
+                    try:
+                        print(f"""$ {self._cross_table_statistics(location,
+                                                         property_type)[stat.value]
+                        :<18.2f}""", end=' ')
+                    except DataSet.NoMatchingItems:
+                        print(f"$ {'N/A':<18}", end=' ')
+                print()
 
     def load_default_data(self):
         """
@@ -127,6 +194,9 @@ class DataSet:
                       ('Brooklyn', 'Private room', 99),
                       ('Brooklyn', 'Private room', 120)]
 
+        # Initialize Labels
+        self._initialize_sets()
+
 
 def menu(dataset: DataSet):
     """
@@ -149,6 +219,7 @@ def menu(dataset: DataSet):
     # Ask the user for main menu selection
     while True:
         try:
+            print()
             selected_option = int(input("What is your choice? "))
         except ValueError:
             print_menu()
@@ -159,12 +230,43 @@ def menu(dataset: DataSet):
             print("Try again. Please select a number from "
                   "1-9.")
             continue
+        if selected_option == 1:
+            try:
+                dataset.display_cross_table(dataset.Stats.AVG)
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
+        if selected_option == 2:
+            try:
+                dataset.display_cross_table(dataset.Stats.MIN)
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
+        if selected_option == 3:
+            try:
+                dataset.display_cross_table(dataset.Stats.MAX)
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
+        if selected_option == 8:
+            dataset.load_default_data()
+            print("Data Set successfully loaded.")
+            continue
+
         if selected_option == 9:
             print("Goodbye! See you next time")
             break
 
-        print(f"Sorry, '{main_menu[selected_option]}' "
-              f"functionality is not implemented yet.")
+        else:
+
+            print(f"Sorry, '{main_menu[selected_option]}' "
+                  f"functionality is not implemented yet.")
         break
 
 
@@ -309,7 +411,8 @@ def data_unit_test():
     else:
         print("No Matching Rows Raises NoMatchingItems: Fail")
 
-    test1 = my_set._cross_table_statistics("Staten Island", "Private room")
+    test1 = my_set._cross_table_statistics("Staten Island",
+                                           "Private room")
 
     if test1 == (70, 70, 70):
         print("One Matching Row Returns Correct Tuple: Pass")
@@ -349,7 +452,9 @@ def currency_options(base_currency: str):
         print()
         for currency in currency_list:
             print(
-                f"{currency_converter(quantity, base_currency, currency):<10.2f}",
+                f"""{currency_converter(quantity,
+                                        base_currency,
+                                        currency):<10.2f}""",
                 end=' ')
 
 
@@ -386,15 +491,5 @@ def main():
 
 
 if __name__ == '__main__':
-    data_unit_test()
-    # main()
 
-"""
-========== Sample Run ==========
-Method Raises EmptyDataSet Error: Pass
-Invalid Property Type Raises NoMatchingItems Error: Pass
-Invalid Borough Raises NoMatchingItems Error: Pass
-No Matching Rows Raises NoMatchingItems: Pass
-One Matching Row Returns Correct Tuple: Pass
-Multiple Matching Rows Returns Correct Tuple: Pass
-"""
+    main()
