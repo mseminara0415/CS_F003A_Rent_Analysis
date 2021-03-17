@@ -1,7 +1,7 @@
 """ Greet users and ask for their name. Ask user what home currency
 they have and print out conversion table based on their selected home currency.
-Asks users to enter a header for their dataset that will be displayed above the menu.
-The main menu is printed and asks users for their selected option.
+Asks users to enter a header for their dataset that will be displayed above the
+menu.The main menu is printed and asks users for their selected option.
 """
 
 from enum import Enum
@@ -80,9 +80,9 @@ class DataSet:
         PROPERTY_TYPE = 1
 
     class Stats(Enum):
-        MIN = 2
+        MIN = 0
         AVG = 1
-        MAX = 3
+        MAX = 2
 
     @property
     def header(self):
@@ -96,6 +96,10 @@ class DataSet:
             raise ValueError("Header must be <= 30 characters")
 
     def _initialize_sets(self):
+        """ Examine the category labels in self.__data and create a set
+        for each category containing the labels.
+        :return:
+        """
         if self._data is None:
             raise DataSet.EmptyDatasetError("Please load data.")
         else:
@@ -115,6 +119,7 @@ class DataSet:
 
     def _cross_table_statistics(self, descriptor_one: str,
                                 descriptor_two: str):
+
         """
         Find data that matches both descriptors.
         :param descriptor_one:
@@ -132,7 +137,7 @@ class DataSet:
                 rents = [rent[2] for rent in matching]
                 avg = sum(rents) / len(rents)
 
-                return min(rents), avg, max(rents)
+        return min(rents), avg, max(rents)
 
     def display_cross_table(self, stat: Stats):
         """
@@ -145,19 +150,26 @@ class DataSet:
         else:
 
             # Print Headers (Property Types)
-            location_list = self._labels[DataSet.Categories.LOCATION]
-            property_list = self._labels[DataSet.Categories.PROPERTY_TYPE]
-            for property in property_list:
-                print(f"{property:>30}", end=' ')
+            location_list = list(self._labels[DataSet.Categories.LOCATION])
+            location_list.sort()
+            property_list = list(self._labels[DataSet.Categories.PROPERTY_TYPE])
+            property_list.sort()
 
+            print(f"               ", end="")
+            # Print Header
+            for property_name in property_list:
+                print(f"{property_name:20}", end=' ')
+            print()
             for location in location_list:
-                print(f"{location:<20}")
-                # for property1 in property_list:
-                #     print(f"""
-                #     {self._cross_table_statistics(location,property1)[DataSet.Stats]:30}]
-                #
-                #
-                #     """)
+                print(f"{location:15}", end=' ')
+                for property_type in property_list:
+                    try:
+                        print(f"""$ {self._cross_table_statistics(location,
+                                                         property_type)[stat.value]
+                        :<18.2f}""", end=' ')
+                    except DataSet.NoMatchingItems:
+                        print(f"$ {'N/A':<18}", end=' ')
+                print()
 
     def load_default_data(self):
         """
@@ -183,6 +195,9 @@ class DataSet:
                       ('Brooklyn', 'Private room', 99),
                       ('Brooklyn', 'Private room', 120)]
 
+        # Initialize Labels
+        self._initialize_sets()
+
 
 def menu(dataset: DataSet):
     """
@@ -205,6 +220,7 @@ def menu(dataset: DataSet):
     # Ask the user for main menu selection
     while True:
         try:
+            print()
             selected_option = int(input("What is your choice? "))
         except ValueError:
             print_menu()
@@ -215,12 +231,43 @@ def menu(dataset: DataSet):
             print("Try again. Please select a number from "
                   "1-9.")
             continue
+        if selected_option == 1:
+            try:
+                dataset.display_cross_table(dataset.Stats.AVG)
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
+        if selected_option == 2:
+            try:
+                dataset.display_cross_table(dataset.Stats.MIN)
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
+        if selected_option == 3:
+            try:
+                dataset.display_cross_table(dataset.Stats.MAX)
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
+        if selected_option == 8:
+            dataset.load_default_data()
+            print("Data Set successfully loaded.")
+            continue
+
         if selected_option == 9:
             print("Goodbye! See you next time")
             break
 
-        print(f"Sorry, '{main_menu[selected_option]}' "
-              f"functionality is not implemented yet.")
+        else:
+
+            print(f"Sorry, '{main_menu[selected_option]}' "
+                  f"functionality is not implemented yet.")
         break
 
 
@@ -406,7 +453,9 @@ def currency_options(base_currency: str):
         print()
         for currency in currency_list:
             print(
-                f"{currency_converter(quantity, base_currency, currency):<10.2f}",
+                f"""{currency_converter(quantity,
+                                        base_currency,
+                                        currency):<10.2f}""",
                 end=' ')
 
 
@@ -443,11 +492,5 @@ def main():
 
 
 if __name__ == '__main__':
-    # data_unit_test()
-    # main()
-    # for location in Categories:
-    #     print(location.value)
-    test = DataSet()
-    test.load_default_data()
-    test._initialize_sets()
-    test.display_cross_table(DataSet.Stats.MAX)
+
+    main()
