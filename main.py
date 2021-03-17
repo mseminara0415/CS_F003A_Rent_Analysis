@@ -134,7 +134,7 @@ class DataSet:
 
                 return min(rents), avg, max(rents)
 
-    def display_cross_table(self, stat: Stats):
+       def display_cross_table(self, stat: Stats):
         """
         Displays table stats.
         :param stat:
@@ -150,20 +150,21 @@ class DataSet:
             property_list = list(self._labels[DataSet.Categories.PROPERTY_TYPE])
             property_list.sort()
 
+            print(f"               ", end="")
             # Print Header
             for property_name in property_list:
-                print(f"{property_name:>30}", end=' ')
-
+                print(f"{property_name:20}", end=' ')
+            print()
             for location in location_list:
-                print()
-                print(f"{location:<15}", end=' ')
+                print(f"{location:15}", end=' ')
                 for property_type in property_list:
                     try:
                         print(f"""$ {self._cross_table_statistics(location,
                                                          property_type)[stat.value]
-                        :<30.2f}""", end=' ')
+                        :<18.2f}""", end=' ')
                     except DataSet.NoMatchingItems:
-                        print(f"$ {'N/A':<30}", end=' ')
+                        print(f"$ {'N/A':<18}", end=' ')
+                print()
 
     def load_default_data(self):
         """
