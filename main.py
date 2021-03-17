@@ -171,6 +171,38 @@ class DataSet:
                         print(f"$ {'N/A':<18}", end=' ')
                 print()
 
+       def display_cross_table(self, stat: Stats):
+        """
+        Displays table stats.
+        :param stat:
+        :return:
+        """
+        if self._data is None:
+            raise DataSet.EmptyDatasetError("Please load data.")
+        else:
+
+            # Print Headers (Property Types)
+            location_list = list(self._labels[DataSet.Categories.LOCATION])
+            location_list.sort()
+            property_list = list(self._labels[DataSet.Categories.PROPERTY_TYPE])
+            property_list.sort()
+
+            print(f"               ", end="")
+            # Print Header
+            for property_name in property_list:
+                print(f"{property_name:20}", end=' ')
+            print()
+            for location in location_list:
+                print(f"{location:15}", end=' ')
+                for property_type in property_list:
+                    try:
+                        print(f"""$ {self._cross_table_statistics(location,
+                                                         property_type)[stat.value]
+                        :<18.2f}""", end=' ')
+                    except DataSet.NoMatchingItems:
+                        print(f"$ {'N/A':<18}", end=' ')
+                print()
+
     def load_default_data(self):
         """
         Load dataset.
