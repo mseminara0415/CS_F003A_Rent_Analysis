@@ -1,6 +1,8 @@
 """ Greet users and ask for their name. Ask user what home currency
-they have and print out conversion table based on their selected home currency.
-Asks users to enter a header for their dataset that will be displayed above the
+they have and print out conversion table based on their selected home
+currency.
+Asks users to enter a header for their dataset that will be displayed
+above the
 menu.The main menu is printed and asks users for their selected option.
 """
 
@@ -54,18 +56,6 @@ class DataSet:
     """
     Class to manage our dataset.
     """
-    header_max_length = 30
-    copyright = "No copyright has been set"
-
-    def __init__(self, header=""):
-        try:
-            self.header = header
-        except ValueError:
-            self.header = ""
-
-        self._data = None
-        self._labels = {}
-        self._active_labels = {}
 
     class EmptyDatasetError(Exception):
         def __init__(self, message):
@@ -84,6 +74,20 @@ class DataSet:
         AVG = 1
         MAX = 2
 
+    header_max_length = 30
+    copyright = "No copyright has been set"
+
+    def __init__(self, header=""):
+        self._active_labels = {DataSet.Categories.LOCATION: set(),
+                               DataSet.Categories.PROPERTY_TYPE: set()}
+        self._labels = {DataSet.Categories.LOCATION: set(),
+                        DataSet.Categories.PROPERTY_TYPE: set()}
+        self._data = None
+        try:
+            self.header = header
+        except ValueError:
+            self.header = ""
+
     @property
     def header(self):
         return self._header
@@ -97,25 +101,16 @@ class DataSet:
 
     def _initialize_sets(self):
         """ Examine the category labels in self.__data and create a set
-        for each category containing the labels.
-        :return:
-        """
-        if self._data is None:
-            raise DataSet.EmptyDatasetError("Please load data.")
-        else:
-            location_list = [location[
-                                 DataSet.Categories.LOCATION.value]
-                             for location in self._data]
+                for each category containing the labels.
+                """
+        if not self._data:
+            raise DataSet.EmptyDatasetError
+        for category in self.Categories:
+            self._labels[category] = set([i[category.value]
+                                          for i in self._data])
 
-            prop_list = [location[
-                             DataSet.Categories.PROPERTY_TYPE.value]
-                         for location in self._data]
-
-            self._labels = {DataSet.Categories.LOCATION: set(
-                location_list), DataSet.Categories.PROPERTY_TYPE: set(
-                prop_list)}
-
-            self._active_labels = self._labels.copy()
+            self._active_labels[category] = self._labels[
+                category].copy()
 
     def _cross_table_statistics(self, descriptor_one: str,
                                 descriptor_two: str):
@@ -139,6 +134,15 @@ class DataSet:
 
         return min(rents), avg, max(rents)
 
+    def _table_statistics(self, row_category: Categories, label: str):
+
+        category_values = self._active_labels[row_category]
+        print(category_values)
+
+        matching = [test for test in self._data if test[0] ==
+                    label]
+        print(matching)
+
     def display_cross_table(self, stat: Stats):
         """
         Displays table stats.
@@ -150,26 +154,62 @@ class DataSet:
         else:
 
             # Print Headers (Property Types)
-            location_list = list(self._labels[DataSet.Categories.LOCATION])
+            location_list = list(
+                self._labels[DataSet.Categories.LOCATION])
             location_list.sort()
-            property_list = list(self._labels[DataSet.Categories.PROPERTY_TYPE])
+            property_list = list(
+                self._labels[DataSet.Categories.PROPERTY_TYPE])
             property_list.sort()
-
             print(f"               ", end="")
-            # Print Header
-            for property_name in property_list:
-                print(f"{property_name:20}", end=' ')
+            for item in property_list:
+                print(f"{item:20}", end="")
             print()
-            for location in location_list:
-                print(f"{location:15}", end=' ')
-                for property_type in property_list:
+            for item_one in location_list:
+                print(f"{item_one:15}", end="")
+                for item_two in property_list:
                     try:
-                        print(f"""$ {self._cross_table_statistics(location,
-                                                         property_type)[stat.value]
-                        :<18.2f}""", end=' ')
+                        value = self._cross_table_statistics(item_one,
+                                                             item_two)[
+                            stat.value]
+                        print(f"$ {value:<18.2f}", end="")
                     except DataSet.NoMatchingItems:
-                        print(f"$ {'N/A':<18}", end=' ')
+                        print(f"$ {'N/A':<18}", end="")
                 print()
+
+    def display_field_table(self, rows: Categories):
+        if self._data is None:
+            raise DataSet.EmptyDatasetError("Please load data.")
+        else:
+            pass
+
+    def get_labels(self, category: Categories):
+        """
+        Returns a list of the items in _labels[category].
+        :param category:
+        :return:
+        """
+        return [item for item in self._labels[category]]
+
+    def get_active_labels(self, category: Categories):
+        """
+        Return a list of items in _labels[category].
+        :param category:
+        :return:
+        """
+        return [item for item in self._active_labels[category]]
+
+    def toggle_active_label(self, category: Categories, descriptor: set):
+        """
+        Add or remove labels from _active_labels allowing the user
+        to filter out certain property types or locations.
+        :param category:
+        :param descriptor:
+        :return:
+        """
+        if descriptor not in self._labels:
+            raise KeyError
+        else:
+            self._active_labels[category] = descriptor
 
     def load_default_data(self):
         """
@@ -250,6 +290,25 @@ def menu(dataset: DataSet):
         if selected_option == 3:
             try:
                 dataset.display_cross_table(dataset.Stats.MAX)
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
+        if selected_option == 6:
+            try:
+                manage_filters(dataset, dataset.Categories.LOCATION)
+                print_menu()
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
+        if selected_option == 7:
+            try:
+                manage_filters(dataset,
+                               dataset.Categories.PROPERTY_TYPE)
+                print_menu()
                 continue
             except dataset.EmptyDatasetError:
                 print("Please load Data first.")
@@ -370,10 +429,12 @@ def class_unit_test():
         print("Setting Dataset.copyright = 'copyright Matt Seminara "
               "unit test'")
         print(
-            "Checking that I can access copyright after creating an object: Pass")
+            "Checking that I can access copyright after creating an "
+            "object: Pass")
     else:
         print(
-            "Checking that I can access copyright after creating an object: Fail")
+            "Checking that I can access copyright after creating an "
+            "object: Fail")
 
 
 def data_unit_test():
@@ -459,6 +520,22 @@ def currency_options(base_currency: str):
                 end=' ')
 
 
+def manage_filters(dataset: DataSet, category: DataSet.Categories):
+    active_labels = dataset.get_active_labels(category)
+
+    while True:
+        print("The following labels are in the dataset:")
+        for i, label in enumerate(active_labels):
+            status = "ACTIVE" if label in active_labels else "INACTIVE"
+            print(f"{i+1}: {label:25}{status}")
+        select_option = input("Please select an option number to "
+                              "toggle. Type Exit to return to menu.")
+        if select_option == "Exit":
+            break
+        else:
+            continue
+
+
 def main():
     """
     Obtain the user's name and greet them. After welcoming the user,
@@ -492,5 +569,4 @@ def main():
 
 
 if __name__ == '__main__':
-
     main()
