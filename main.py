@@ -1,12 +1,12 @@
-""" Greet users and ask for their name. Ask user what home currency
-they have and print out conversion table based on their selected home
-currency.
-Asks users to enter a header for their dataset that will be displayed
-above the
-menu.The main menu is printed and asks users for their selected option.
+""" Greets users and asks for name, currency, and a header that will be
+displayed. A menu is displayed where users have the option to view slices
+of the data based on locations or property types, also giving the functionality
+to enable/disable individual locations/properties.
 """
 
 from enum import Enum
+import csv
+
 
 conversions = {
     "USD": 1,
@@ -20,6 +20,8 @@ conversions = {
 }
 
 home_currency = ''
+
+filename = './AB_NYC_2019.csv'
 
 
 def print_menu():
@@ -135,13 +137,36 @@ class DataSet:
         return min(rents), avg, max(rents)
 
     def _table_statistics(self, row_category: Categories, label: str):
+        """
+        Calculates min, max, and average based on the selected category and
+        the current set of active labels.
+        :param row_category:
+        :param label:
+        :return:
+        """
 
-        category_values = self._active_labels[row_category]
-        print(category_values)
+        active_properties = self._active_labels[row_category.PROPERTY_TYPE]
+        active_locations = self._active_labels[row_category.LOCATION]
 
-        matching = [test for test in self._data if test[0] ==
-                    label]
-        print(matching)
+        if row_category == self.Categories.LOCATION:
+            matching = [_property for _property in self._data
+                        if _property[0] == label
+                        and _property[1] in active_properties]
+
+        elif row_category == self.Categories.PROPERTY_TYPE:
+            matching = [location for location in self._data
+                        if location[0] in active_locations
+                        and location[1] == label]
+        else:
+            matching = []
+
+        if not matching:
+            raise DataSet.NoMatchingItems("No matching items.")
+        else:
+            rents = [rent[2] for rent in matching]
+            avg = sum(rents) / len(rents)
+
+        return min(rents), avg, max(rents)
 
     def display_cross_table(self, stat: Stats):
         """
@@ -177,10 +202,38 @@ class DataSet:
                 print()
 
     def display_field_table(self, rows: Categories):
+        """
+        Displays min, max, and average data based on a filtered dataset.
+        :param rows:
+        :return:
+        """
         if self._data is None:
             raise DataSet.EmptyDatasetError("Please load data.")
         else:
-            pass
+            active_labels = self._active_labels[rows]
+
+            # Print Header Line
+            if rows == rows.PROPERTY_TYPE:
+                print("The location data matches the following criteria:")
+                for item in self._active_labels[rows.LOCATION]:
+                    print(item)
+            else:
+                print("The property data matches the following criteria:")
+                for item in self._active_labels[rows.PROPERTY_TYPE]:
+                    print(item)
+
+            print(f"                         ", end="")
+            print(f"{'Minimum':20}{'Maximum':20}{'Average':520}")
+            for item in active_labels:
+                print(f"{item:25}", end="")
+
+                for header in range(3):
+                    try:
+                        value = self._table_statistics(rows, item)[header]
+                        print(f"$ {value:<18.2f}", end="")
+                    except DataSet.NoMatchingItems:
+                        print(f"$ {'N/A':<18}", end="")
+                print()
 
     def get_labels(self, category: Categories):
         """
@@ -198,7 +251,7 @@ class DataSet:
         """
         return [item for item in self._active_labels[category]]
 
-    def toggle_active_label(self, category: Categories, descriptor: set):
+    def toggle_active_label(self, category: Categories, descriptor: str):
         """
         Add or remove labels from _active_labels allowing the user
         to filter out certain property types or locations.
@@ -206,10 +259,12 @@ class DataSet:
         :param descriptor:
         :return:
         """
-        if descriptor not in self._labels:
+        if descriptor not in self._labels[category]:
             raise KeyError
+        elif descriptor not in self._active_labels[category]:
+            self._active_labels[category].add(descriptor)
         else:
-            self._active_labels[category] = descriptor
+            self._active_labels[category].remove(descriptor)
 
     def load_default_data(self):
         """
@@ -238,6 +293,21 @@ class DataSet:
         # Initialize Labels
         self._initialize_sets()
 
+    def load_file(self, file_name):
+
+        file_to_open = open(file_name, mode="r", newline='')
+        csv_reader = csv.reader(file_to_open)
+
+        data_original = [tuple(row)[1:] for row in csv_reader][1:]
+        data_formatted = [(x[0], x[1], int(x[2])) for x in
+                          data_original]
+        n_lines = len(data_original)
+        self._data = data_formatted
+
+        # Initialize Labels
+        self._initialize_sets()
+        return n_lines
+
 
 def menu(dataset: DataSet):
     """
@@ -262,6 +332,7 @@ def menu(dataset: DataSet):
         try:
             print()
             selected_option = int(input("What is your choice? "))
+            print()
         except ValueError:
             print_menu()
             print("Try again. Please enter a valid number only.")
@@ -295,6 +366,24 @@ def menu(dataset: DataSet):
                 print("Please load Data first.")
                 continue
 
+        if selected_option == 4:
+            try:
+                locations = dataset.Categories.LOCATION
+                dataset.display_field_table(locations)
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
+        if selected_option == 5:
+            try:
+                properties = dataset.Categories.PROPERTY_TYPE
+                dataset.display_field_table(properties)
+                continue
+            except dataset.EmptyDatasetError:
+                print("Please load Data first.")
+                continue
+
         if selected_option == 6:
             try:
                 manage_filters(dataset, dataset.Categories.LOCATION)
@@ -315,8 +404,8 @@ def menu(dataset: DataSet):
                 continue
 
         if selected_option == 8:
-            dataset.load_default_data()
-            print("Data Set successfully loaded.")
+            n_lines = dataset.load_file(file_name=filename)
+            print(f"Data Set successfully loaded {n_lines} lines.")
             continue
 
         if selected_option == 9:
@@ -521,19 +610,38 @@ def currency_options(base_currency: str):
 
 
 def manage_filters(dataset: DataSet, category: DataSet.Categories):
-    active_labels = dataset.get_active_labels(category)
+    """
+    Displays the active labels and allows users to enable/disable which ones
+    are in the filter criteria for the data.
+    :param dataset:
+    :param category:
+    :return:
+    """
+
+    labels = dataset.get_labels(category)
+    labels.sort()
 
     while True:
+        active_labels = dataset.get_active_labels(category)
+        active_labels.sort()
         print("The following labels are in the dataset:")
-        for i, label in enumerate(active_labels):
+        for i, label in enumerate(labels, 1):
             status = "ACTIVE" if label in active_labels else "INACTIVE"
-            print(f"{i+1}: {label:25}{status}")
+            print(f"{i}: {label:25}{status}")
         select_option = input("Please select an option number to "
-                              "toggle. Type Exit to return to menu.")
-        if select_option == "Exit":
-            break
-        else:
-            continue
+                              "toggle. Type 'Exit' to return to menu.")
+
+        try:
+            if select_option == "Exit".lower()\
+                    or select_option == "Exit".upper()\
+                    or select_option == "Exit".title():
+                break
+            else:
+                dataset.toggle_active_label(category,
+                                            labels[int(select_option)-1])
+        except IndexError:
+            print()
+            print("Please select one of the listed options only.")
 
 
 def main():
