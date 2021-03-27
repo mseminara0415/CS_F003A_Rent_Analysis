@@ -1,7 +1,8 @@
 """ Greets users and asks for name, currency, and a header that will be
 displayed. A menu is displayed where users have the option to view slices
 of the data based on locations or property types, also giving the functionality
-to enable/disable individual locations/properties.
+to enable/disable individual locations/properties. Data is loaded
+from a csv with over 48,000 data points.
 """
 
 from enum import Enum
@@ -294,18 +295,28 @@ class DataSet:
         self._initialize_sets()
 
     def load_file(self, file_name):
+        """
+        Load Data from file. .
+        :return:
+        """
 
+        # Load in data from file
         file_to_open = open(file_name, mode="r", newline='')
         csv_reader = csv.reader(file_to_open)
 
+        # Create list of tuples in same format as method 'Load
+        # Default Data'
         data_original = [tuple(row)[1:] for row in csv_reader][1:]
         data_formatted = [(x[0], x[1], int(x[2])) for x in
                           data_original]
+
+        # Determine how many lines of data are in the file
         n_lines = len(data_original)
         self._data = data_formatted
 
         # Initialize Labels
         self._initialize_sets()
+
         return n_lines
 
 
@@ -639,7 +650,7 @@ def manage_filters(dataset: DataSet, category: DataSet.Categories):
             else:
                 dataset.toggle_active_label(category,
                                             labels[int(select_option)-1])
-        except IndexError:
+        except (IndexError, ValueError):
             print()
             print("Please select one of the listed options only.")
 
@@ -678,3 +689,143 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+"""
+========== Sample Run ==========
+Hello, please enter your name: Matt
+Hey Matt, welcome to our class project!
+What is your home currency?usd
+Enter a header for the menu:header
+Options for converting from USD:
+USD        EUR        CAD        GBP        CHF        NZD        AUD        JPY        
+10.00      9.00       14.00      8.00       9.50       16.60      16.20      1079.20    
+20.00      18.00      28.00      16.00      19.00      33.20      32.40      2158.40    
+30.00      27.00      42.00      24.00      28.50      49.80      48.60      3237.60    
+40.00      36.00      56.00      32.00      38.00      66.40      64.80      4316.80    
+50.00      45.00      70.00      40.00      47.50      83.00      81.00      5396.00    
+60.00      54.00      84.00      48.00      57.00      99.60      97.20      6475.20    
+70.00      63.00      98.00      56.00      66.50      116.20     113.40     7554.40    
+80.00      72.00      112.00     64.00      76.00      132.80     129.60     8633.60    
+90.00      81.00      126.00     72.00      85.50      149.40     145.80     9712.80    
+
+copyright Matthew Seminara
+header
+Main Menu
+1 - Print Average Rent by Location and Property Type
+2 - Print Minimum Rent by Location and Property Type
+3 - Print Maximum Rent by Location and Property Type
+4 - Print Min/Avg/Max by Location
+5 - Print Min/Avg/Max by Property Type
+6 - Adjust Location Filters
+7 - Adjust Property Type Filters
+8 - Load Data
+9 - Quit
+
+What is your choice? 1
+
+Please load Data first.
+
+What is your choice? 8
+
+Data Set successfully loaded 48895 lines.
+
+What is your choice? 1
+
+               Entire home/apt     Private room        Shared room         
+Bronx          $ 127.51            $ 66.79             $ 59.80             
+Brooklyn       $ 178.33            $ 76.50             $ 50.53             
+Manhattan      $ 249.24            $ 116.78            $ 88.98             
+Queens         $ 147.05            $ 71.76             $ 69.02             
+Staten Island  $ 173.85            $ 62.29             $ 57.44             
+
+What is your choice? 2
+
+               Entire home/apt     Private room        Shared room         
+Bronx          $ 28.00             $ 0.00              $ 20.00             
+Brooklyn       $ 0.00              $ 0.00              $ 0.00              
+Manhattan      $ 0.00              $ 10.00             $ 10.00             
+Queens         $ 10.00             $ 10.00             $ 11.00             
+Staten Island  $ 48.00             $ 20.00             $ 13.00             
+
+What is your choice? 3
+
+               Entire home/apt     Private room        Shared room         
+Bronx          $ 1000.00           $ 2500.00           $ 800.00            
+Brooklyn       $ 10000.00          $ 7500.00           $ 725.00            
+Manhattan      $ 10000.00          $ 9999.00           $ 1000.00           
+Queens         $ 2600.00           $ 10000.00          $ 1800.00           
+Staten Island  $ 5000.00           $ 300.00            $ 150.00            
+
+What is your choice? 4
+
+The property data matches the following criteria:
+Entire home/apt
+Private room
+Shared room
+                         Minimum             Maximum             Average                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+Brooklyn                 $ 0.00              $ 124.38            $ 10000.00          
+Staten Island            $ 13.00             $ 114.81            $ 5000.00           
+Bronx                    $ 0.00              $ 87.50             $ 2500.00           
+Manhattan                $ 0.00              $ 196.88            $ 10000.00          
+Queens                   $ 10.00             $ 99.52             $ 10000.00          
+
+What is your choice? 5
+
+The location data matches the following criteria:
+Brooklyn
+Staten Island
+Bronx
+Manhattan
+Queens
+                         Minimum             Maximum             Average                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+Entire home/apt          $ 0.00              $ 211.79            $ 10000.00          
+Private room             $ 0.00              $ 89.78             $ 10000.00          
+Shared room              $ 0.00              $ 70.13             $ 1800.00           
+
+What is your choice? 6
+
+The following labels are in the dataset:
+1: Bronx                    ACTIVE
+2: Brooklyn                 ACTIVE
+3: Manhattan                ACTIVE
+4: Queens                   ACTIVE
+5: Staten Island            ACTIVE
+Please select an option number to toggle. Type 'Exit' to return to menu.3
+The following labels are in the dataset:
+1: Bronx                    ACTIVE
+2: Brooklyn                 ACTIVE
+3: Manhattan                INACTIVE
+4: Queens                   ACTIVE
+5: Staten Island            ACTIVE
+Please select an option number to toggle. Type 'Exit' to return to menu.4
+The following labels are in the dataset:
+1: Bronx                    ACTIVE
+2: Brooklyn                 ACTIVE
+3: Manhattan                INACTIVE
+4: Queens                   INACTIVE
+5: Staten Island            ACTIVE
+Please select an option number to toggle. Type 'Exit' to return to menu.Exit
+Main Menu
+1 - Print Average Rent by Location and Property Type
+2 - Print Minimum Rent by Location and Property Type
+3 - Print Maximum Rent by Location and Property Type
+4 - Print Min/Avg/Max by Location
+5 - Print Min/Avg/Max by Property Type
+6 - Adjust Location Filters
+7 - Adjust Property Type Filters
+8 - Load Data
+9 - Quit
+
+What is your choice? 5
+
+The location data matches the following criteria:
+Brooklyn
+Staten Island
+Bronx
+                         Minimum             Maximum             Average                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+Entire home/apt          $ 0.00              $ 176.35            $ 10000.00          
+Private room             $ 0.00              $ 75.68             $ 7500.00           
+Shared room              $ 0.00              $ 51.81             $ 800.00            
+
+What is your choice? 
+"""
